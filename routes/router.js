@@ -3,8 +3,12 @@ const multer = require('multer')
 const storage = multer.memoryStorage();
 const { s3 } = require('../aws/awsconfig')
 require('dotenv').config()
+const Images = require('../models/Images.js')
+const mongoose = require('../db/mongoose')
 
 const router = express.Router()
+
+router.use(express.json())
 
 const uploadImageToS3 = async (params) => {
     const s3Upload = await s3.upload(params).promise()
@@ -16,7 +20,6 @@ const fetchImageFromS3 = async (params) => {
 
     
     const s3Data = await s3.listObjectsV2(params).promise()
-    console.log(s3Data)
 
     s3Data.Contents.map((obj) => {
 
@@ -43,7 +46,7 @@ router.get('', (req, res) => {
 
 router.get('/images/all', async (req, res) => {
     const params = {
-        Bucket: 'tasleem-s3-bucket',
+        Bucket: process.env.AWS_BUCKET_NAME,
         Prefix: 'images/'
     };
 
@@ -63,13 +66,22 @@ router.post('/images/upload', upload.single('imageFile'), async (req, res) => {
         return; 
       }
     const params = {
-        Bucket: 'tasleem-s3-bucket',
+        Bucket: process.env.AWS_BUCKET_NAME,
         Key: `images/${file.originalname}`,
         Body: file.buffer
     };
 
+    const image = new Images({
+        filename: file.originalname,
+        file: `https://${params.Bucket}.s3.amazonaws.com/${file.originalname}`,
+        category: 'employees'
+    })
+
     try{
         const UploadedImages = await uploadImageToS3(params)
+
+        await image.save()
+
         res.status(200).send('Image uploaded successfully!')
     } catch(e) {
         res.send("Error: "+ e)

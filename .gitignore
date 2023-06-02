@@ -1,2 +1,4 @@
 #ignoring nodemods
 node_modules/
+
+.env
