@@ -5,11 +5,12 @@ const cors = require('cors')
 const router = require('./routes/router')
 
 const app = express();
-const port = process.env.PORT
-
-app.use(router)
+const port = 8080
+// const port = process.env.PORT || 8080
 app.use(cors())
 
+app.use(router)
+
 app.listen(port, () => {
-    console.log('App started successfully')
+    console.log('App started successfully', port)
 })

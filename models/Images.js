@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const User = require('../models/user')
 
 const Images = mongoose.model('Images', {
     filename: {
@@ -12,6 +13,11 @@ const Images = mongoose.model('Images', {
     category: {
         type: String,
         required: true
+    },
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
     }
 })
 
